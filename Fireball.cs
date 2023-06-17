@@ -3,28 +3,24 @@ using System.Collections;
 
 public class Fireball : MonoBehaviour
 {
-
+    public string EnemyTag;
     private Rigidbody rb;
 
-    public Vector3 velocity;
+    private Vector3 velocity;
 
     public float TimeToDestroy = 1f;
 
     public Transform FireballObject;
     public GameObject FireChild;
 
+    
+
     float counter;
-
-    void Update()
+    private void Awake()
     {
-        counter += Time.deltaTime;
-
-        if (counter >= TimeToDestroy)
-        {
-           // StartCoroutine(Destroy());
-        }
+        StartCoroutine(timedDeath());
     }
-
+   
 
     // Use this for initialization
     void Start()
@@ -38,6 +34,7 @@ public class Fireball : MonoBehaviour
 	    FireChild = this.gameObject.transform.GetChild(0).GetChild(0).gameObject;
 	    FireChild.SetActive(true);
 
+       
     }
 
     // Update is called once per frame
@@ -74,7 +71,7 @@ public class Fireball : MonoBehaviour
             velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
 
-            if (col.gameObject.tag == "Respawn")
+            if (col.gameObject.tag == "EnemyTag")
             {
                 Invoke("Explode", delayExplode);
                 Destroy(this.gameObject);
@@ -108,7 +105,12 @@ public class Fireball : MonoBehaviour
         Destroy(Clone, 3);
         yield return new WaitForSeconds(1);
         Destroy(gameObject);
+     
     }
 
-    
+    IEnumerator timedDeath()
+    {
+        yield return new WaitForSeconds(TimeToDestroy);
+        Object.Destroy(this.gameObject);
+    }
 }
