@@ -15,7 +15,7 @@ public class Fireball : MonoBehaviour
 
     
 
-    float counter;
+    //float counter;
     private void Awake()
     {
         StartCoroutine(timedDeath());
@@ -71,7 +71,7 @@ public class Fireball : MonoBehaviour
             velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
 
-            if (col.gameObject.tag == "EnemyTag")
+            if (col.gameObject.tag == EnemyTag)
             {
                 Invoke("Explode", delayExplode);
                 Destroy(this.gameObject);
