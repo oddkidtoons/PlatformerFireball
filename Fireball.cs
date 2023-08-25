@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Fireball : MonoBehaviour
 {
-    public string EnemyTag;
+   
     private Rigidbody rb;
 
     private Vector3 velocity;
@@ -71,26 +71,25 @@ public class Fireball : MonoBehaviour
             velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
 
-            if (col.gameObject.tag == "EnemyTag")
-            {
+           
                 Invoke("Explode", delayExplode);
                 Destroy(this.gameObject);
-            }
+          
 
         }
 
     }
 
-    public GameObject Explosion;
+    public GameObject ExplosionVFX;
     private GameObject effectClone;
     public float delayExplode;
 
 
     void Explode()
     {
-        effectClone = Explosion;
+        effectClone = ExplosionVFX;
         Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
-        //Destroy(effectClone);
+        
     }
 
 

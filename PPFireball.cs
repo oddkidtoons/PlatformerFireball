@@ -6,7 +6,7 @@ using PLAYERTWO.PlatformerProject;
 
     public class PPFireball : MonoBehaviour
     {
-        //public string EnemyTag;
+      
         private Rigidbody rb;
 
         private Vector3 velocity;
@@ -81,8 +81,11 @@ using PLAYERTWO.PlatformerProject;
 
                 velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
+          
+                Invoke("Explode", delayExplode);
+                Destroy(this.gameObject);
+          
 
-         
 
 
         }
@@ -98,7 +101,7 @@ using PLAYERTWO.PlatformerProject;
         {
             effectClone = ExplosionVFX;
             Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
-            //Destroy(effectClone);
+            
         }
 
 
