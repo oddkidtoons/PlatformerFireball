@@ -10,17 +10,17 @@ public class Fireball : MonoBehaviour
 
     public float TimeToDestroy = 1f;
 
-    public Transform FireballObject;
-    public GameObject FireChild;
+    public Transform FireballParent;
+    public GameObject FireVFX;
 
-    
 
-    //float counter;
+
+    float counter;
     private void Awake()
     {
         StartCoroutine(timedDeath());
     }
-   
+
 
     // Use this for initialization
     void Start()
@@ -29,12 +29,12 @@ public class Fireball : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         velocity = rb.velocity;
         //Assigns the transform of the first child of the Game Object this script is attached to.
-        FireballObject = this.gameObject.transform.GetChild(0);
+        FireballParent = this.gameObject.transform.GetChild(0);
         //Assigns the first child of the first child of the Game Object this script is attached to.
-	    FireChild = this.gameObject.transform.GetChild(0).GetChild(0).gameObject;
-	    FireChild.SetActive(true);
+        FireVFX = this.gameObject.transform.GetChild(0).GetChild(0).gameObject;
+        FireVFX.SetActive(true);
 
-       
+
     }
 
     // Update is called once per frame
@@ -53,7 +53,7 @@ public class Fireball : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
-           
+
         if (col.contacts[0].normal.y > 0.4 && col.contacts[0].normal.y < 1.6)
         {
             rb.velocity = new Vector3(velocity.x, -velocity.y, velocity.z);
@@ -71,7 +71,7 @@ public class Fireball : MonoBehaviour
             velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
 
-            if (col.gameObject.tag == EnemyTag)
+            if (col.gameObject.tag == "EnemyTag")
             {
                 Invoke("Explode", delayExplode);
                 Destroy(this.gameObject);
@@ -81,14 +81,14 @@ public class Fireball : MonoBehaviour
 
     }
 
-    public GameObject effect;
+    public GameObject Explosion;
     private GameObject effectClone;
     public float delayExplode;
 
-    
+
     void Explode()
     {
-        effectClone = effect;
+        effectClone = Explosion;
         Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
         //Destroy(effectClone);
     }
@@ -105,7 +105,7 @@ public class Fireball : MonoBehaviour
         Destroy(Clone, 3);
         yield return new WaitForSeconds(1);
         Destroy(gameObject);
-     
+
     }
 
     IEnumerator timedDeath()
