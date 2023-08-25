@@ -55,8 +55,8 @@ using PLAYERTWO.PlatformerProject;
         private void OnTriggerEnter(Collider other)
         {
             if (other.TryGetComponent<Enemy>(out var enemy))
-            { 
-                enemy.ApplyDamage(damageAmount);
+            {
+            enemy.ApplyDamage(damageAmount, transform.position);
             Invoke("Explode", delayExplode);
             Destroy(this.gameObject);
         }
