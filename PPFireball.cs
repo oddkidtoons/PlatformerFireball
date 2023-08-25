@@ -6,15 +6,15 @@ using PLAYERTWO.PlatformerProject;
 
     public class PPFireball : MonoBehaviour
     {
-        public string EnemyTag;
+        //public string EnemyTag;
         private Rigidbody rb;
 
         private Vector3 velocity;
 
         public float TimeToDestroy = 1f;
 
-        public Transform FireballObject;
-        public GameObject FireChild;
+        public Transform FireballParent;
+        public GameObject FireVFX;
 
         public int damageAmount = 1;
 
@@ -34,8 +34,8 @@ using PLAYERTWO.PlatformerProject;
             //Assigns the transform of the first child of the Game Object this script is attached to.
             // FireballObject = FireballObject.gameObject.transform.GetChild(0);
             //Assigns the first child of the first child of the Game Object this script is attached to.
-            FireChild = FireballObject.gameObject.transform.GetChild(0).gameObject;
-            FireChild.SetActive(true);
+            FireVFX = FireballParent.gameObject.transform.GetChild(0).gameObject;
+            FireVFX.SetActive(true);
 
 
         }
@@ -80,23 +80,23 @@ using PLAYERTWO.PlatformerProject;
                 Vector3 newvel = Vector3.Reflect(oldVel, col.contacts[0].normal);
 
                 velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
-                //rb.velocity = rb.velocity;
+            //rb.velocity = rb.velocity;
 
+         
 
-               
-
-            }
 
         }
 
-        public GameObject effect;
+        }
+
+        public GameObject ExplosionVFX;
         private GameObject effectClone;
         public float delayExplode;
 
 
         void Explode()
         {
-            effectClone = effect;
+            effectClone = ExplosionVFX;
             Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
             //Destroy(effectClone);
         }
