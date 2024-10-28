@@ -2,11 +2,17 @@
 using System.Collections;
 using PLAYERTWO.PlatformerProject;
 
-
+namespace PLAYERTWO.PlatformerProject{
 
     public class PPFireball : MonoBehaviour
     {
-      
+      [Header("Attack Settings")]
+		public bool breakObjects;
+		public int breakableDamage = 1;
+
+		protected Collider m_collider;
+       
+
         private Rigidbody rb;
 
         private Vector3 velocity;
@@ -16,7 +22,7 @@ using PLAYERTWO.PlatformerProject;
         public Transform FireballParent;
         public GameObject FireVFX;
 
-        public int damageAmount = 1;
+        public int enemyDamageAmount = 1;
 
         float counter;
         private void Awake()
@@ -28,9 +34,11 @@ using PLAYERTWO.PlatformerProject;
         // Use this for initialization
         void Start()
         {
+            	
+			InitializeCollider();
 
             rb = GetComponent<Rigidbody>();
-            velocity = rb.velocity;
+            velocity = rb.linearVelocity;
             //Assigns the transform of the first child of the Game Object this script is attached to.
             // FireballObject = FireballObject.gameObject.transform.GetChild(0);
             //Assigns the first child of the first child of the Game Object this script is attached to.
@@ -40,34 +48,63 @@ using PLAYERTWO.PlatformerProject;
 
         }
 
+
+		protected virtual void InitializeCollider()
+		{
+			m_collider = GetComponent<Collider>();
+			m_collider.isTrigger = true;
+		}
+        protected virtual void HandleCollision(Collider other)
+		{
+		
+
+			if (other.TryGetComponent(out Breakable breakable))
+			{
+				HandleBreakableObject(breakable);
+			}
+		}
+        protected virtual void HandleBreakableObject(Breakable breakable)
+		{
+			if (!breakObjects) return;
+
+			breakable.ApplyDamage(breakableDamage);
+
+		}
+
         // Update is called once per frame
         void FixedUpdate()
         {
             Vector3 gravity = 120 * Vector3.down; //cant simulate fireball bounces with normal realworld gravity, so i ad a downwards force that i can change from script, simulating gravity for fireball only
             rb.AddForce(gravity, ForceMode.Acceleration);
 
-            if (rb.velocity.y < velocity.y) //to avoid arcs formed when mario initially shoots fireball
+            if (rb.linearVelocity.y < velocity.y) //to avoid arcs formed when mario initially shoots fireball
             {
-                rb.velocity = velocity;
+                rb.linearVelocity = velocity;
             }
 
         }
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.TryGetComponent<Enemy>(out var enemy))
-            {
-            enemy.ApplyDamage(damageAmount, transform.position);
-            Invoke("Explode", delayExplode);
-            Destroy(this.gameObject);
-        }
-        }
+        protected virtual void HandleCustomCollision(Collider other) { }
+
+      private void OnTriggerEnter(Collider other)
+{
+    if (other.TryGetComponent<Enemy>(out var enemy))
+    {
+        enemy.ApplyDamage(enemyDamageAmount, transform.position);
+        Invoke("Explode", delayExplode);
+        Destroy(this.gameObject);
+        HandleCustomCollision(other);
+    }
+    
+    HandleCollision(other);
+}
+
 
         void OnCollisionEnter(Collision col)
         {
 
             if (col.contacts[0].normal.y > 0.4 && col.contacts[0].normal.y < 1.6)
             {
-                rb.velocity = new Vector3(velocity.x, -velocity.y, velocity.z);
+                rb.linearVelocity = new Vector3(velocity.x, -velocity.y, velocity.z);
             }
 
             //reflect
@@ -124,4 +161,4 @@ using PLAYERTWO.PlatformerProject;
             yield return new WaitForSeconds(TimeToDestroy);
             Object.Destroy(this.gameObject);
         }
-    } 
+    } }
