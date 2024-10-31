@@ -25,6 +25,12 @@ namespace PLAYERTWO.PlatformerProject{
         public int enemyDamageAmount = 1;
 
         float counter;
+
+          public GameObject ExplosionVFX;
+        private GameObject effectClone;
+        public float delayExplode;
+
+
         private void Awake()
         {
             StartCoroutine(timedDeath());
@@ -34,7 +40,7 @@ namespace PLAYERTWO.PlatformerProject{
         // Use this for initialization
         void Start()
         {
-            	
+            	ExplosionVFX.SetActive(false);
 			InitializeCollider();
 
             rb = GetComponent<Rigidbody>();
@@ -129,13 +135,12 @@ namespace PLAYERTWO.PlatformerProject{
 
         }
 
-        public GameObject ExplosionVFX;
-        private GameObject effectClone;
-        public float delayExplode;
+      
 
 
         void Explode()
         {
+            ExplosionVFX.SetActive(true);
             effectClone = ExplosionVFX;
             Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
             
