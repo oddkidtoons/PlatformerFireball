@@ -26,9 +26,16 @@ namespace OddKidAnimationEvents
 
      
 
-        public void PlayObjectFeedback(int index)
+        public void PlayFeedback(int index)
         {
             feedbacks[index]?.PlayFeedbacks();
+            
+           
+
+        }
+        public void PlayCustomEvent(int index)
+        {
+         
             
             CustomEvents[index].Invoke();
 
