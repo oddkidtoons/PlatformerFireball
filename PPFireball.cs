@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using PLAYERTWO.PlatformerProject;
+using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject{
 
@@ -29,7 +30,7 @@ namespace PLAYERTWO.PlatformerProject{
           public GameObject ExplosionVFX;
         private GameObject effectClone;
         public float delayExplode;
-
+public UnityEvent DamageEvent;
 
         private void Awake()
         {
@@ -99,9 +100,12 @@ namespace PLAYERTWO.PlatformerProject{
         Invoke("Explode", delayExplode);
         Destroy(this.gameObject);
         HandleCustomCollision(other);
+         if (DamageEvent != null)
+                DamageEvent.Invoke();
     }
     
     HandleCollision(other);
+    
 }
 
 
@@ -138,12 +142,13 @@ namespace PLAYERTWO.PlatformerProject{
       
 
 
-        void Explode()
+        public void Explode()
         {
             ExplosionVFX.SetActive(true);
             effectClone = ExplosionVFX;
             Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
-            
+               if (DamageEvent != null)
+                DamageEvent.Invoke();
         }
 
 
