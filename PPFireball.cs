@@ -21,7 +21,8 @@ namespace PLAYERTWO.PlatformerProject{
         public float TimeToDestroy = 1f;
 
         public Transform FireballParent;
-        public GameObject FireVFX;
+        public GameObject BulletVFX;
+        public GameObject MuzzleVFX;
 
         public int enemyDamageAmount = 1;
 
@@ -35,22 +36,34 @@ public UnityEvent DamageEvent;
         private void Awake()
         {
             StartCoroutine(timedDeath());
+        
         }
 
 
         // Use this for initialization
         void Start()
         {
-            	ExplosionVFX.SetActive(false);
-			InitializeCollider();
+            if (ExplosionVFX != null){ 
+            ExplosionVFX.SetActive(false);}
+
+                  if (MuzzleVFX != null){
+            MuzzleVFX.SetActive(true);
+            }
+			
+            InitializeCollider();
 
             rb = GetComponent<Rigidbody>();
             velocity = rb.linearVelocity;
+
+          
             //Assigns the transform of the first child of the Game Object this script is attached to.
             // FireballObject = FireballObject.gameObject.transform.GetChild(0);
             //Assigns the first child of the first child of the Game Object this script is attached to.
-            FireVFX = FireballParent.gameObject.transform.GetChild(0).gameObject;
-            FireVFX.SetActive(true);
+            if (BulletVFX != null){
+                
+            BulletVFX = FireballParent.gameObject.transform.GetChild(0).gameObject;
+            BulletVFX.SetActive(true);
+            }
 
 
         }
@@ -90,6 +103,8 @@ public UnityEvent DamageEvent;
             }
 
         }
+        
+        
         protected virtual void HandleCustomCollision(Collider other) { }
 
       private void OnTriggerEnter(Collider other)
@@ -97,11 +112,13 @@ public UnityEvent DamageEvent;
     if (other.TryGetComponent<Enemy>(out var enemy))
     {
         enemy.ApplyDamage(enemyDamageAmount, transform.position);
-        Invoke("Explode", delayExplode);
+if (ExplosionVFX != null){ 
+        Invoke("Explode", delayExplode);}
+
         Destroy(this.gameObject);
         HandleCustomCollision(other);
-         if (DamageEvent != null)
-                DamageEvent.Invoke();
+         if (DamageEvent != null){
+                DamageEvent.Invoke();}
     }
     
     HandleCollision(other);
@@ -128,8 +145,8 @@ public UnityEvent DamageEvent;
 
                 velocity = new Vector3(newvel.x, oldVel.y, newvel.z);
             //rb.velocity = rb.velocity;
-          
-                Invoke("Explode", delayExplode);
+           if (ExplosionVFX != null){
+                Invoke("Explode", delayExplode);}
                 Destroy(this.gameObject);
           
 
@@ -144,11 +161,13 @@ public UnityEvent DamageEvent;
 
         public void Explode()
         {
+          
             ExplosionVFX.SetActive(true);
+            
             effectClone = ExplosionVFX;
             Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
-               if (DamageEvent != null)
-                DamageEvent.Invoke();
+               if (DamageEvent != null){
+                DamageEvent.Invoke();}
         }
 
 
