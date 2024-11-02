@@ -62,6 +62,7 @@ public UnityEvent DamageEvent;
             if (BulletVFX != null){
                 
             BulletVFX = FireballParent.gameObject.transform.GetChild(0).gameObject;
+          
             BulletVFX.SetActive(true);
             }
 
@@ -114,11 +115,12 @@ public UnityEvent DamageEvent;
         enemy.ApplyDamage(enemyDamageAmount, transform.position);
 if (ExplosionVFX != null){ 
         Invoke("Explode", delayExplode);}
-
+   if (DamageEvent != null){
+                DamageEvent.Invoke();}
         Destroy(this.gameObject);
         HandleCustomCollision(other);
-         if (DamageEvent != null){
-                DamageEvent.Invoke();}
+        
+      
     }
     
     HandleCollision(other);
@@ -147,6 +149,7 @@ if (ExplosionVFX != null){
             //rb.velocity = rb.velocity;
            if (ExplosionVFX != null){
                 Invoke("Explode", delayExplode);}
+              
                 Destroy(this.gameObject);
           
 
@@ -165,9 +168,10 @@ if (ExplosionVFX != null){
             ExplosionVFX.SetActive(true);
             
             effectClone = ExplosionVFX;
-            Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
-               if (DamageEvent != null){
-                DamageEvent.Invoke();}
+            GameObject Clone = Instantiate(effectClone, gameObject.transform.position, gameObject.transform.rotation);
+        Clone.GetComponent<ParticleSystem>().Play();
+           Destroy(Clone, 1);
+           
         }
 
 
