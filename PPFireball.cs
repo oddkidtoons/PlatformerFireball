@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using PLAYERTWO.PlatformerProject;
+using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject{
 
@@ -19,13 +20,15 @@ namespace PLAYERTWO.PlatformerProject{
 		public int breakableDamage = 1;
 		protected Collider m_collider;
 public LayerMask myLayerMask; //Select the layers that the fireball ignores. 
-        
 public int enemyDamageAmount = 1; //PP Enemy Damage setting
+
+
+public UnityEvent onExplode; //Events that trigger when the projectile hits something
+
 
         void Start()
         {
-    InitializeCollider();
-
+             InitializeCollider();
             projectileParticle = Instantiate(projectileParticle, transform.position, transform.rotation) as GameObject;
             projectileParticle.transform.parent = transform;
             if (muzzleParticle)
@@ -34,8 +37,7 @@ public int enemyDamageAmount = 1; //PP Enemy Damage setting
                 Destroy(muzzleParticle, 1.5f); // 2nd parameter is lifetime of effect in seconds
             }
         }
-		
-protected virtual void InitializeCollider()
+        protected virtual void InitializeCollider()
 		{
 			m_collider = GetComponent<Collider>();
 			m_collider.isTrigger = true;
@@ -56,13 +58,12 @@ protected virtual void InitializeCollider()
 			breakable.ApplyDamage(breakableDamage);
 
 		}
-
-
+		
         void FixedUpdate()
         {	
-			if (GetComponent<Rigidbody>().linearVelocity.magnitude != 0)
+			if (GetComponent<Rigidbody>().velocity.magnitude != 0)
 			{
-			    transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().linearVelocity); // Sets rotation to look at direction of movement
+			    transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity); // Sets rotation to look at direction of movement
 			}
 			
             RaycastHit hit;
@@ -73,14 +74,14 @@ protected virtual void InitializeCollider()
             else
                 radius = colliderRadius;
 
-            Vector3 direction = transform.GetComponent<Rigidbody>().linearVelocity; // Gets the direction of the projectile, used for collision detection
+            Vector3 direction = transform.GetComponent<Rigidbody>().velocity; // Gets the direction of the projectile, used for collision detection
             if (transform.GetComponent<Rigidbody>().useGravity)
                 direction += Physics.gravity * Time.deltaTime; // Accounts for gravity if enabled
             direction = direction.normalized;
 
-            float detectionDistance = transform.GetComponent<Rigidbody>().linearVelocity.magnitude * Time.deltaTime; // Distance of collision detection for this frame
+            float detectionDistance = transform.GetComponent<Rigidbody>().velocity.magnitude * Time.deltaTime; // Distance of collision detection for this frame
 
-            if (Physics.SphereCast(transform.position, radius, direction, out hit, detectionDistance, myLayerMask)) // Checks if collision will happen
+            if (Physics.SphereCast(transform.position, radius, direction, out hit, detectionDistance)) // Checks if collision will happen
             {
                 transform.position = hit.point + (hit.normal * collideOffset); // Move projectile to point of collision
 
@@ -98,13 +99,12 @@ protected virtual void InitializeCollider()
                         Destroy(trail.gameObject, 2f); // Removes the trail after seconds
                     }
                 }
-
+onExplode?.Invoke();
                 Destroy(projectileParticle, 3f); // Removes particle effect after delay
                 Destroy(impactP, 3.5f); // Removes impact effect after delay
                 Destroy(gameObject); // Removes the projectile
             }
         }
-
           protected virtual void HandleCustomCollision(Collider other) { }
 
       private void OnTriggerEnter(Collider other)
@@ -113,10 +113,13 @@ protected virtual void InitializeCollider()
 
     if (other.TryGetComponent<Enemy>(out var enemy))
     {
+
+        
         enemy.ApplyDamage(enemyDamageAmount, transform.position);
                   
-      
+
         HandleCustomCollision(other);
+  
     Destroy(this.gameObject);
         
       
@@ -125,6 +128,6 @@ protected virtual void InitializeCollider()
     HandleCollision(other);
     
 }
-
-
-    }}
+   
+    }
+}

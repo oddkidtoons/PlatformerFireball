@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 
 
 
-
 namespace PLAYERTWO.PlatformerProject{
+
 public class PPClassicFireball : MonoBehaviour
 	{
 	
@@ -51,10 +51,10 @@ public class PPClassicFireball : MonoBehaviour
 		{
 			
 				yield return new WaitForSeconds(0.1f);
-				GameObject Clone = Instantiate(fireball, fireball_spawn_loc.position, fireball_spawn_loc.transform.rotation);
+				GameObject Clone = Instantiate(fireball, fireball_spawn_loc.position, fireball.transform.rotation);
 				Clone.GetComponent<PPFireball>().enabled = true;
 				//Clone.transform.GetChild(0).gameObject.SetActive(true);
-				Clone.GetComponent<Rigidbody>().linearVelocity = transform.TransformDirection(fireballVel.x, fireballVel.y, fireballVel.z);//initial speed
+				Clone.GetComponent<Rigidbody>().velocity = transform.TransformDirection(fireballVel.x, fireballVel.y, fireballVel.z);//initial speed
 		
 
 		}
