@@ -1,0 +1,34 @@
+{
+    "name": "OddKid_Input",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "6d2b4a79-e0b3-4475-8fad-7e6d1c971abe",
+            "actions": [
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "3dd3b723-428f-43de-b3fa-2d45c8e00e5e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8bed4596-de14-4443-a21a-46fe2c775342",
+                    "path": "<XInputController>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
