@@ -68,6 +68,7 @@ public UnityEvent onExplode; //Events that trigger when the projectile hits some
 			}
 			
             RaycastHit hit;
+            //Physics.queriesHitTriggers = false;
 			
             float radius; // Sets the radius of the collision detection
             if (transform.GetComponent<SphereCollider>())
@@ -82,7 +83,7 @@ public UnityEvent onExplode; //Events that trigger when the projectile hits some
 
             float detectionDistance = transform.GetComponent<Rigidbody>().velocity.magnitude * Time.deltaTime; // Distance of collision detection for this frame
 
-            if (Physics.SphereCast(transform.position, radius, direction, out hit, detectionDistance)) // Checks if collision will happen
+            if (Physics.SphereCast(transform.position, radius, direction, out hit, detectionDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) // Checks if collision will happen
             {
                 transform.position = hit.point + (hit.normal * collideOffset); // Move projectile to point of collision
 
@@ -111,8 +112,6 @@ onExplode?.Invoke();
    private void OnCollisionEnter(Collision collision)
 {
     HandleCollision(collision.collider);
-
-     
 
     
 }
