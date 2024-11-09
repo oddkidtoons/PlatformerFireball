@@ -27,6 +27,9 @@ AudioSource audioSource;
         public int enemyDamageAmount = 1;
 
           public GameObject ExplosionVFX;
+          public bool timeDestroy;
+           public float TimeToDestroy = 1f;
+           float counter;
         public AudioClip explosionAudio;
        
       
@@ -34,11 +37,17 @@ public UnityEvent onExplode;
 
    
 
-        private void Awake()
+        void Update()
+    {
+        counter += Time.deltaTime;
+
+        if (!timeDestroy) return;
+
+        if (counter >= TimeToDestroy)
         {
-          
-        
+           Explode();
         }
+    }
 
 
         // Use this for initialization
@@ -54,11 +63,11 @@ public UnityEvent onExplode;
            
             audioSource.PlayOneShot(bulletAudio);}
 
-BulletVFX = Instantiate(BulletVFX, transform.position, transform.rotation) as GameObject;
+BulletVFX = Instantiate(BulletVFX, transform.position, Quaternion.FromToRotation(Vector3.up, transform.up)) as GameObject;
             BulletVFX.transform.parent = transform;
             if (MuzzleVFX)
             {
-                MuzzleVFX = Instantiate(MuzzleVFX, transform.position, transform.rotation) as GameObject;
+                MuzzleVFX = Instantiate(MuzzleVFX, transform.position, Quaternion.FromToRotation(Vector3.up, transform.up)) as GameObject;
                 Destroy(MuzzleVFX, 1.5f); // 2nd parameter is lifetime of effect in seconds
             }
 
@@ -181,5 +190,9 @@ onExplode?.Invoke();
                 Destroy(BulletVFX, 3f); // Removes particle effect after delay
                 Destroy(impactP, 3.5f); // Removes impact effect after delay
                 Destroy(gameObject); // Removes the projectile
+              
 }
+
+
+
        }}
