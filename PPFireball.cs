@@ -171,7 +171,7 @@ private void Explode(){
          AudioSource.PlayClipAtPoint(explosionAudio, transform.position, 1f);}
 
                // transform.position = hit.point + (hit.normal * collideOffset); // Move projectile to point of collision
-
+ if (bulletAudio != null){ 
                 GameObject impactP = Instantiate(ExplosionVFX, transform.position, Quaternion.FromToRotation(Vector3.up, transform.up)) as GameObject; // Spawns impact effect
 
                 ParticleSystem[] trails = GetComponentsInChildren<ParticleSystem>(); // Gets a list of particle systems, as we need to detach the trails
@@ -186,9 +186,11 @@ private void Explode(){
                         Destroy(trail.gameObject, 2f); // Removes the trail after seconds
                     }
                 }
+                   Destroy(impactP, 3.5f); // Removes impact effect after delay
+                }
 onExplode?.Invoke();
                 Destroy(BulletVFX, 3f); // Removes particle effect after delay
-                Destroy(impactP, 3.5f); // Removes impact effect after delay
+             
                 Destroy(gameObject); // Removes the projectile
               
 }
