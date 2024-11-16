@@ -9,26 +9,28 @@ namespace PLAYERTWO.PlatformerProject
 {
     public class PPClassicFireball : MonoBehaviour
     {
+      
         public Fireball_Input playerControls;
         private InputAction fire;
-
+  [Header("-------- Classic Fireball ------------------------")]
         public GameObject fireball;
         public Transform fireball_spawn_loc;
         public Vector3 fireballVel;
-
+    [Header("-------- Shots to Overheat ------------------------")]
         public int maxShotsBeforeOverheat = 5;
-          [Header("--------Overheat Cooldown Delay ------------------------")]
+          [Header("-------- Overheat Cooldown Delay ------------------------")]
         public float cooldownTime = 5f; // Overheat cooldown time
         private int shotsFired = 0;
         private bool isOverheated = false;
- [Header("--------UI SLider / Fill ------------------------")]
+ [Header("-------- UI SLider / Fill ------------------------")]
         [SerializeField] private Image overheatingFill;
         public Color normalColor = Color.green;
         public Color overheatedColor = Color.red;
+          [Header("-------- Overheat SoundFX ------------------------")]
    public AudioSource audioSource;
         public AudioClip overheatSound;
 
-     [Header("--------Overheat Events ------------------------")]
+     [Header("-------- Overheat Events ------------------------")]
         public UnityEvent onOverheated;
         public UnityEvent onCooldownComplete;
 
@@ -37,7 +39,7 @@ namespace PLAYERTWO.PlatformerProject
         private bool isShooting = false;
         private bool isCooldownActive = false;
         private float stopShootingTimer = 0f;
-          [Header("--------Stop Shooting Cooldown Delay ------------------------")]
+          [Header("-------- Stop Shooting Cooldown Delay ------------------------")]
         public float stopShootingDelay = 1f;
 
      
