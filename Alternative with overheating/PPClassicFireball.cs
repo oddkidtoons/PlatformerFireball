@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;  // <-- Add this for accessing Unity UI Image component
 using TMPro;  // For TextMeshPro
+using UnityEngine.Events; // Import for UnityEvent
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -33,6 +34,12 @@ namespace PLAYERTWO.PlatformerProject
 
         // Reference to TextMeshPro for showing the shot count
         [SerializeField] private TextMeshProUGUI shotCountText; // For TextMeshProUGUI
+
+		   // UnityEvent that triggers when the weapon overheats
+        public UnityEvent onOverheated;
+
+        // UnityEvent that triggers when the cooldown completes
+        public UnityEvent onCooldownComplete;
 
         private void Awake()
         {
@@ -68,7 +75,21 @@ namespace PLAYERTWO.PlatformerProject
         private void Update()
         {
             // If cooldown is active, handle the cooldown process
-            if (isCooldownActive)
+            if (isCooldownActive && isOverheated)
+            {
+                stopShootingTimer += Time.deltaTime;
+
+                // Wait for stopShootingDelay before resetting shots
+                if (stopShootingTimer >= cooldownTime)
+                {
+                    ResetShots();
+                    isCooldownActive = false;
+					onCooldownComplete?.Invoke(); // Invoke cooldown complete event
+                }
+            }
+
+			 // If cooldown is active, handle the cooldown process
+            if (isCooldownActive && !isOverheated)
             {
                 stopShootingTimer += Time.deltaTime;
 
@@ -77,8 +98,10 @@ namespace PLAYERTWO.PlatformerProject
                 {
                     ResetShots();
                     isCooldownActive = false;
+					
                 }
             }
+
 
             // If overheating, handle cooling down process
             if (isOverheated)
@@ -97,6 +120,7 @@ namespace PLAYERTWO.PlatformerProject
                 if (cooldownProgress >= 1f)
                 {
                     ResetShots();
+					
                 }
             }
 
@@ -112,7 +136,7 @@ namespace PLAYERTWO.PlatformerProject
                 return;
             }
 
-            if (shotsFired < maxShotsBeforeOverheat)
+            if (!isOverheated)
             {
                 StartCoroutine(Shoot_Fireball());
                 shotsFired++; // Increase shots fired count
@@ -125,31 +149,37 @@ namespace PLAYERTWO.PlatformerProject
 
                 // Update shot count UI
                 UpdateShotCountUI();
-
-                if (shotsFired >= maxShotsBeforeOverheat)
+			
+             
+            }
+			   if (shotsFired >= maxShotsBeforeOverheat)
                 {
                     OverheatWeapon();
                 }
-            }
         }
 
         private void StopShooting(InputAction.CallbackContext context)
         {
-            if (isShooting)
+            if (isShooting && !isOverheated)
             {
                 stopShootingTimer = 0f; // Reset stop shooting timer if shooting resumes
                 isCooldownActive = false; // Stop cooldown if shooting is resumed
             }
 
             // Start cooldown after the delay when shooting stops
-            if (!isOverheated && shotsFired > 0)
+            if (!isOverheated && !isShooting && overheatingFill != null && shotsFired <= maxShotsBeforeOverheat)
             {
-                Debug.Log("Stopping fire, cooldown will start after delay...");
-                stopShootingTimer += Time.deltaTime;
-                if (stopShootingTimer >= 2f)
-                {
-                    isCooldownActive = true;
-                }
+               
+                //stopShootingTimer += Time.deltaTime;
+                //if (stopShootingTimer >= stopShootingDelay)
+                //{
+					
+                   // isCooldownActive = true;
+               // }
+
+			 
+			   StartCoroutine(stopCooldown());
+			    Debug.Log("Stopping fire, Cooldown starting now");
             }
         }
 
@@ -186,6 +216,8 @@ namespace PLAYERTWO.PlatformerProject
             {
                 overheatingFill.color = overheatedColor; // Change the bar color to red when overheated
             }
+			// Invoke the custom overheating event
+            onOverheated?.Invoke();
         }
 
         private IEnumerator Shoot_Fireball()
@@ -203,5 +235,14 @@ namespace PLAYERTWO.PlatformerProject
                 shotCountText.text = $"{shotsFired}";
             }
         }
+
+		public IEnumerator stopCooldown(){
+Debug.Log("stop cooldown");
+
+			yield return new WaitForSeconds(stopShootingDelay);
+			isCooldownActive = true;
+			Debug.Log("stop coooldown happened");
+
+		}
     }
 }
