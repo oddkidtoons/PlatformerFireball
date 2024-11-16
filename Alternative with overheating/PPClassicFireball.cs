@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;  // <-- Add this for accessing Unity UI Image component
-using TMPro;  // For TextMeshPro
-using UnityEngine.Events; // Import for UnityEvent
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
@@ -16,35 +16,42 @@ namespace PLAYERTWO.PlatformerProject
         public Transform fireball_spawn_loc;
         public Vector3 fireballVel;
 
-        public int maxShotsBeforeOverheat = 5; // Max shots before overheating
-        public float cooldownTime = 5f; // Time to fully cool down (in seconds)
-        private int shotsFired = 0; // Number of shots fired
-        private bool isOverheated = false; // Flag for overheating state
+        public int maxShotsBeforeOverheat = 5;
+          [Header("--------Overheat Cooldown Delay ------------------------")]
+        public float cooldownTime = 5f; // Overheat cooldown time
+        private int shotsFired = 0;
+        private bool isOverheated = false;
+ [Header("--------UI SLider / Fill ------------------------")]
+        [SerializeField] private Image overheatingFill;
+        public Color normalColor = Color.green;
+        public Color overheatedColor = Color.red;
+   public AudioSource audioSource;
+        public AudioClip overheatSound;
 
-        [SerializeField] private Image overheatingFill; // UI Image fill for overheating status
-        public Color normalColor = Color.green; // Bar color when not overheated
-        public Color overheatedColor = Color.red; // Bar color when overheated
-        private bool isShooting = false; // To track if the player is shooting
-        private bool isCooldownActive = false; // To check if cooldown is active
-        private float stopShootingTimer = 0f; // Timer to delay cooldown after stopping shooting
-        public float stopShootingDelay = 1f; // Delay before shots reset after stopping shooting (configurable by the user)
-
-        public AudioSource audioSource; // Reference to the AudioSource
-        public AudioClip overheatSound; // Sound when the weapon overheats
-
-        // Reference to TextMeshPro for showing the shot count
-        [SerializeField] private TextMeshProUGUI shotCountText; // For TextMeshProUGUI
-
-		   // UnityEvent that triggers when the weapon overheats
+     [Header("--------Overheat Events ------------------------")]
         public UnityEvent onOverheated;
-
-        // UnityEvent that triggers when the cooldown completes
         public UnityEvent onCooldownComplete;
+
+
+
+        private bool isShooting = false;
+        private bool isCooldownActive = false;
+        private float stopShootingTimer = 0f;
+          [Header("--------Stop Shooting Cooldown Delay ------------------------")]
+        public float stopShootingDelay = 1f;
+
+     
+
+        private float currentFillAmount = 0f;
+        private Coroutine stopShootingDelayCoroutine;  // Reference to the delay coroutine
+
+         [Header("--------For Testing Only ------------------------")]
+        [SerializeField] private TextMeshProUGUI shotCountText;
 
         private void Awake()
         {
             playerControls = new Fireball_Input();
-            shotsFired = 0; // Reset shots fired
+            shotsFired = 0;
         }
 
         private void OnEnable()
@@ -64,67 +71,59 @@ namespace PLAYERTWO.PlatformerProject
         {
             if (overheatingFill != null)
             {
-                overheatingFill.fillAmount = 0f; // Initialize at 0 (no overheating)
+                overheatingFill.fillAmount = 0f;
                 overheatingFill.color = normalColor;
             }
-
-            // Initialize the shot count UI
             UpdateShotCountUI();
         }
 
         private void Update()
         {
-            // If cooldown is active, handle the cooldown process
-            if (isCooldownActive && isOverheated)
+            if (isCooldownActive)
             {
                 stopShootingTimer += Time.deltaTime;
+                float cooldownProgress;
 
-                // Wait for stopShootingDelay before resetting shots
-                if (stopShootingTimer >= cooldownTime)
+                if (!isOverheated)
                 {
-                    ResetShots();
-                    isCooldownActive = false;
-					onCooldownComplete?.Invoke(); // Invoke cooldown complete event
+                    // Cooldown after stop shooting
+                    cooldownProgress = stopShootingTimer / stopShootingDelay;
+                    currentFillAmount = Mathf.Lerp((float)shotsFired / maxShotsBeforeOverheat, 0f, cooldownProgress);
+
+                    // Update the shot count based on the cooldown
+                    int shotsToRemove = Mathf.FloorToInt(shotsFired * cooldownProgress);
+                    shotsFired -= shotsToRemove;
+
+                    // Update the UI with the current percentage
+                    overheatingFill.fillAmount = Mathf.Clamp01(currentFillAmount);
+
+                    if (cooldownProgress >= 1f)
+                    {
+                        ResetShots();
+                        isCooldownActive = false;
+                    }
+                }
+                else
+                {
+                    // Cooldown after overheat
+                    cooldownProgress = stopShootingTimer / cooldownTime;
+                    currentFillAmount = Mathf.Lerp(1f, 0f, cooldownProgress);
+
+                    // Update the shot count based on the cooldown
+                    int shotsToRemove = Mathf.FloorToInt(shotsFired * cooldownProgress);
+                    shotsFired -= shotsToRemove;
+
+                    overheatingFill.fillAmount = Mathf.Clamp01(currentFillAmount);
+
+                    if (cooldownProgress >= 1f)
+                    {
+                        ResetShots();
+                        isCooldownActive = false;
+                        onCooldownComplete?.Invoke();
+                    }
                 }
             }
 
-			 // If cooldown is active, handle the cooldown process
-            if (isCooldownActive && !isOverheated)
-            {
-                stopShootingTimer += Time.deltaTime;
-
-                // Wait for stopShootingDelay before resetting shots
-                if (stopShootingTimer >= stopShootingDelay)
-                {
-                    ResetShots();
-                    isCooldownActive = false;
-					
-                }
-            }
-
-
-            // If overheating, handle cooling down process
-            if (isOverheated)
-            {
-                stopShootingTimer += Time.deltaTime;
-                // Calculate cooldown progress
-                float cooldownProgress = stopShootingTimer / cooldownTime;
-
-                // Update overheating UI fill
-                if (overheatingFill != null)
-                {
-                    overheatingFill.fillAmount = 1f - cooldownProgress; // Cooldown decreases the fill
-                }
-
-                // Once cooldown is complete, reset overheating and shots
-                if (cooldownProgress >= 1f)
-                {
-                    ResetShots();
-					
-                }
-            }
-
-            // Update shot count UI with current value
             UpdateShotCountUI();
         }
 
@@ -139,85 +138,112 @@ namespace PLAYERTWO.PlatformerProject
             if (!isOverheated)
             {
                 StartCoroutine(Shoot_Fireball());
-                shotsFired++; // Increase shots fired count
+                shotsFired++;
 
-                // Update the overheating fill bar based on shots fired
                 if (overheatingFill != null)
                 {
-                    overheatingFill.fillAmount = (float)shotsFired / maxShotsBeforeOverheat;
+                    currentFillAmount = (float)shotsFired / maxShotsBeforeOverheat;
+                    overheatingFill.fillAmount = currentFillAmount;
                 }
 
-                // Update shot count UI
                 UpdateShotCountUI();
-			
-             
             }
-			   if (shotsFired >= maxShotsBeforeOverheat)
-                {
-                    OverheatWeapon();
-                }
+
+            if (shotsFired >= maxShotsBeforeOverheat)
+            {
+                OverheatWeapon();
+            }
+
+            // If shooting again during cooldown, reset the delay timer and restart it
+            if (isCooldownActive)
+            {
+                ResetCooldownState();
+            }
         }
 
         private void StopShooting(InputAction.CallbackContext context)
         {
-            if (isShooting && !isOverheated)
+            if (!isOverheated && shotsFired > 0)
             {
-                stopShootingTimer = 0f; // Reset stop shooting timer if shooting resumes
-                isCooldownActive = false; // Stop cooldown if shooting is resumed
-            }
-
-            // Start cooldown after the delay when shooting stops
-            if (!isOverheated && !isShooting && overheatingFill != null && shotsFired <= maxShotsBeforeOverheat)
-            {
-               
-                //stopShootingTimer += Time.deltaTime;
-                //if (stopShootingTimer >= stopShootingDelay)
-                //{
-					
-                   // isCooldownActive = true;
-               // }
-
-			 
-			   StartCoroutine(stopCooldown());
-			    Debug.Log("Stopping fire, Cooldown starting now");
+                if (stopShootingDelayCoroutine != null)
+                {
+                    // Cancel the previous stop shooting delay coroutine
+                    StopCoroutine(stopShootingDelayCoroutine);
+                }
+                stopShootingDelayCoroutine = StartCoroutine(StartCooldownAfterDelay());
+                Debug.Log("Stopping fire, cooldown starting now.");
             }
         }
 
-        // Reset shots fired and handle overheating state
+        private IEnumerator StartCooldownAfterDelay()
+        {
+            // Delay before starting the stop shooting cooldown
+            yield return new WaitForSeconds(stopShootingDelay);
+
+            // Set the current fill amount based on shots fired, for a smooth transition
+            if (overheatingFill != null)
+            {
+                currentFillAmount = (float)shotsFired / maxShotsBeforeOverheat;
+                overheatingFill.fillAmount = currentFillAmount;
+            }
+
+            // Start cooldown after the delay
+            isCooldownActive = true;
+            stopShootingTimer = 0f;
+            Debug.Log("Stop shooting cooldown has started.");
+        }
+
+        private void ResetCooldownState()
+        {
+            // Reset the cooldown state and UI when shooting resumes
+            isCooldownActive = false;
+            stopShootingTimer = 0f;
+
+            if (overheatingFill != null)
+            {
+                currentFillAmount = (float)shotsFired / maxShotsBeforeOverheat;
+                overheatingFill.fillAmount = currentFillAmount;
+            }
+
+            Debug.Log("Cooldown reset due to new shot.");
+        }
+
         private void ResetShots()
         {
             shotsFired = 0;
-            isOverheated = false; // Reset overheating state
-            stopShootingTimer = 0f; // Reset cooldown timer
+            isOverheated = false;
+            stopShootingTimer = 0f;
 
             if (overheatingFill != null)
             {
                 overheatingFill.fillAmount = 0f;
-                overheatingFill.color = normalColor; // Reset color to normal
+                overheatingFill.color = normalColor;
             }
 
             Debug.Log("Cooldown complete, shots reset to 0.");
-            UpdateShotCountUI(); // Update the shot count display
+            UpdateShotCountUI();
         }
 
-        // Overheat logic
         private void OverheatWeapon()
         {
             isOverheated = true;
 
             if (audioSource != null && overheatSound != null)
             {
-                audioSource.PlayOneShot(overheatSound); // Play the overheat sound
+                audioSource.PlayOneShot(overheatSound);
             }
 
             Debug.Log("Weapon overheated! Cooling down...");
 
             if (overheatingFill != null)
             {
-                overheatingFill.color = overheatedColor; // Change the bar color to red when overheated
+                overheatingFill.color = overheatedColor;
             }
-			// Invoke the custom overheating event
             onOverheated?.Invoke();
+
+            // Trigger cooldown after overheating
+            isCooldownActive = true;
+            stopShootingTimer = 0f;
         }
 
         private IEnumerator Shoot_Fireball()
@@ -227,7 +253,6 @@ namespace PLAYERTWO.PlatformerProject
             clone.GetComponent<Rigidbody>().linearVelocity = transform.TransformDirection(fireballVel);
         }
 
-        // Update the shot count UI text (TextMeshPro)
         private void UpdateShotCountUI()
         {
             if (shotCountText != null)
@@ -235,14 +260,5 @@ namespace PLAYERTWO.PlatformerProject
                 shotCountText.text = $"{shotsFired}";
             }
         }
-
-		public IEnumerator stopCooldown(){
-Debug.Log("stop cooldown");
-
-			yield return new WaitForSeconds(stopShootingDelay);
-			isCooldownActive = true;
-			Debug.Log("stop coooldown happened");
-
-		}
     }
 }
