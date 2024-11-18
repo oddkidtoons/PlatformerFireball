@@ -34,6 +34,10 @@ public class OddKidSeekingProjectile : MonoBehaviour
     private bool hasHit = false;  // Flag to check if the projectile has already hit something
     private GameObject instantiatedProjectileVFX;  // Reference to the instantiated projectile VFX
 
+[Header("Ignored Layers")]
+    public LayerMask ignoredLayers;  // Layer mask to specify which layers to ignore
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -146,6 +150,43 @@ public class OddKidSeekingProjectile : MonoBehaviour
             return targetTransform.position;
         }
     }
+
+     void OnCollisionEnter(Collision other)
+    {
+        if (hasHit) return;
+
+        // Check if the object is on one of the ignored layers
+        if ((ignoredLayers.value & (1 << other.gameObject.layer)) != 0)
+        {
+            return;  // Ignore collision if the object is on an ignored layer
+        }
+
+        speed = 0;
+
+        ContactPoint contact = other.contacts[0];
+        Quaternion rot = Quaternion.FromToRotation(Vector3.up, contact.normal);
+        Vector3 pos = contact.point;
+
+        if (hitPrefab != null)
+        {
+            var hitVFX = Instantiate(hitPrefab, pos, rot);
+            var psHit = hitVFX.GetComponent<ParticleSystem>();
+            hitVFX.transform.localScale = hitScale;
+            if (psHit != null)
+            {
+                Destroy(hitVFX, psHit.main.duration);
+            }
+            else
+            {
+                var psChild = hitVFX.transform.GetChild(0).GetComponent<ParticleSystem>();
+                Destroy(hitVFX, psChild.main.duration);
+            }
+        }
+
+        Destroy(gameObject);
+    }
+
+
 
     void OnTriggerEnter(Collider other)
     {

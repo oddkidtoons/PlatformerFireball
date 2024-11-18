@@ -3,14 +3,15 @@ using PLAYERTWO.PlatformerProject;
 
 namespace PLAYERTWO.PlatformerProject
 {
-    [RequireComponent(typeof(SphereCollider))]
+    [RequireComponent(typeof(AudioSource))]
     public class DamagePPEnemy : MonoBehaviour
     {
         [Header("Attack Settings")]
         public bool breakObjects;
         public int breakableDamage = 1;
         public int enemyDamageAmount = 1;
-        protected Collider m_collider;
+
+        private Collider m_collider;
 
         void Start()
         {
@@ -20,7 +21,10 @@ namespace PLAYERTWO.PlatformerProject
         protected virtual void InitializeCollider()
         {
             m_collider = GetComponent<Collider>();
-            m_collider.isTrigger = true; // Make this a trigger to detect enemies without physical interaction
+            if (m_collider != null)
+            {
+                m_collider.isTrigger = true;  // Ensure this is a trigger collider
+            }
         }
 
         protected virtual void HandleCollision(Collider other)
@@ -41,12 +45,16 @@ namespace PLAYERTWO.PlatformerProject
 
         private void OnTriggerEnter(Collider other)
         {
-            // This will only trigger on the PlatformerProject enemy
-            if (other.TryGetComponent<Enemy>(out var enemy))
+            if (other.CompareTag("Enemy"))
             {
-                enemy.ApplyDamage(enemyDamageAmount, transform.position);
-                HandleCustomCollision(other);
+                // Damage enemy logic
+                if (other.TryGetComponent<Enemy>(out var enemy))
+                {
+                    enemy.ApplyDamage(enemyDamageAmount, transform.position);
+                    HandleCustomCollision(other);
+                }
             }
+
             HandleCollision(other);
         }
     }
