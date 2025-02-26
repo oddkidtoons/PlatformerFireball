@@ -81,6 +81,8 @@ namespace PLAYERTWO.PlatformerProject
 
         private void Update()
         {
+             if (overheatingFill != null)
+            {
             if (isCooldownActive)
             {
                 stopShootingTimer += Time.deltaTime;
@@ -124,7 +126,7 @@ namespace PLAYERTWO.PlatformerProject
                         onCooldownComplete?.Invoke();
                     }
                 }
-            }
+            }}
 
             UpdateShotCountUI();
         }
