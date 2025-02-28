@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject{
 [RequireComponent(typeof(AudioSource))]
-    public class PPFireball : MonoBehaviour
+    public class PPFireballHeat : MonoBehaviour
     {
         
 AudioSource audioSource;

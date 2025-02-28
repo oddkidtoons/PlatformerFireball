@@ -7,7 +7,7 @@ using UnityEngine.Events;
 
 namespace PLAYERTWO.PlatformerProject
 {
-    public class PPClassicFireball : MonoBehaviour
+    public class PPClassicFireballHeat : MonoBehaviour
     {
       
         public Fireball_Input playerControls;
